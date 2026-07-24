@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Grafirio.Shared.Identity</PackageId>
+    <Description>Shared identity and authorization layer for Grafirio services: Keycloak integration, current-user abstraction, company-based authorization policies, handlers, attributes and endpoint filters.</Description>
+    <PackageTags>grafirio;identity;keycloak;authorization;multitenancy</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.7" />
+    <PackageReference Include="Refit.HttpClientFactory" Version="7.2.1" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Grafirio.Shared.Infrastructure\Grafirio.Shared.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

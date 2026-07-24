@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Grafirio.Contracts.AI/Grafirio.Contracts.AI.csproj" />
+    <Project Path="src/Grafirio.Shared.Identity/Grafirio.Shared.Identity.csproj" />
+    <Project Path="src/Grafirio.Shared.Infrastructure/Grafirio.Shared.Infrastructure.csproj" />
+  </Folder>
+</Solution>

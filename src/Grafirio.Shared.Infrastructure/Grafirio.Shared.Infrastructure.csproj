@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Grafirio.Shared.Infrastructure</PackageId>
+    <Description>Shared ASP.NET Core infrastructure for Grafirio services: ServiceResult pattern, exception handling, correlation ID and request logging middleware, API versioning, FluentValidation endpoint filter and MassTransit/RabbitMQ setup.</Description>
+    <PackageTags>grafirio;infrastructure;middleware;masstransit;versioning</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Asp.Versioning.Http" Version="8.1.0" />
+    <PackageReference Include="Asp.Versioning.Mvc" Version="8.1.0" />
+    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0" />
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="MassTransit" Version="8.3.5" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.3.5" />
+    <PackageReference Include="MediatR" Version="12.4.1" />
+    <PackageReference Include="Refit.HttpClientFactory" Version="7.2.1" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+</Project>
