@@ -26,5 +26,5 @@ The `publish.yml` workflow builds, packs and pushes to GitHub Packages using the
 Add the feed to your `nuget.config` (authenticate with a PAT that has `read:packages` scope, supplied via environment variable — never commit tokens):
 
 ```xml
-<add key="grafirio" value="https://nuget.pkg.github.com/OWNER/index.json" />
+<add key="grafirio" value="https://nuget.pkg.github.com/Grafirio/index.json" />
 ```
