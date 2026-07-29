@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Grafirio.Contracts.Commerce</PackageId>
+    <Description>MassTransit message contracts between Grafirio commerce and identity: order payment results and the access they grant.</Description>
+    <PackageTags>grafirio;contracts;masstransit;messaging;commerce</PackageTags>
+  </PropertyGroup>
+
+</Project>
