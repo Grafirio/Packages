@@ -128,7 +128,32 @@ namespace Grafirio.Shared.Identity.Services
             
             _adminOptions = adminOptions;
             _realm = _adminOptions.Realm;
-            _adminApi = RestService.For<IKeycloakAdminApi>(identityOptions.Address);
+            _adminApi = RestService.For<IKeycloakAdminApi>(ResolveAdminBaseUrl(adminOptions, identityOptions));
+        }
+
+        /// <summary>
+        /// Admin API'nin kok adresini bulur.
+        ///
+        /// IdentityOption.Address iki uyumsuz amaca hizmet ediyordu: JWT authority'si
+        /// olarak realm URL'i olmasi gerekiyor, Admin API tabani olarak ise realm'siz
+        /// kok. Tek deger ikisini birden karsilayamadigi icin kullanici olusturma
+        /// ".../realms/x/admin/realms/x/users" gibi bir adrese gidip 404 aliyordu.
+        ///
+        /// AdminAddress verilmisse o kullanilir; verilmemisse adresteki "/realms/..."
+        /// ekini atarak kok cikarilir, boylece mevcut yapilandirmalar degismeden calisir.
+        /// </summary>
+        internal static string ResolveAdminBaseUrl(KeycloakAdminOptions adminOptions,
+            IdentityOption identityOptions)
+        {
+            if (!string.IsNullOrWhiteSpace(adminOptions.AdminAddress))
+            {
+                return adminOptions.AdminAddress.TrimEnd('/');
+            }
+
+            var address = (identityOptions.Address ?? string.Empty).TrimEnd('/');
+            var realmsIndex = address.IndexOf("/realms/", StringComparison.OrdinalIgnoreCase);
+
+            return realmsIndex > 0 ? address[..realmsIndex] : address;
         }
 
         public async Task<ServiceResult<string>> CreateUserAsync(CreateUserRequest request)
@@ -329,5 +354,11 @@ namespace Grafirio.Shared.Identity.Services
         public required string Realm { get; set; }
         public required string Username { get; set; }
         public required string Password { get; set; }
+
+        /// <summary>
+        /// Keycloak'in kok adresi (ornek: https://keycloak.example.com), realm eki olmadan.
+        /// Bos birakilirsa <see cref="IdentityOption.Address"/> uzerinden turetilir.
+        /// </summary>
+        public string? AdminAddress { get; set; }
     }
 }
