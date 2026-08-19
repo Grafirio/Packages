@@ -19,9 +19,9 @@ namespace Grafirio.Shared.Identity.Permissions
     public static class AppPermissions
     {
         /// <summary>
-        /// Panele giriş. Departman bu izni kaldıramaz — daraltma modül ve
-        /// aksiyon seviyesinde kalıyor, aksi halde yanlış bir departman ataması
-        /// kullanıcıyı boş bir ekran yerine kapının dışında bırakır.
+        /// Panele giriş. Üyelikle birlikte geliyor ve izin kümesiyle
+        /// kaldırılamıyor: yanlış tanımlanmış bir rol, kullanıcıyı boş bir ekran
+        /// yerine kapının dışında bırakmasın.
         /// </summary>
         public const string PanelRead = "PANEL.READ";
 
@@ -53,32 +53,32 @@ namespace Grafirio.Shared.Identity.Permissions
         /// </summary>
         public const string CompanySettingsCreateChild = "COMPANY_SETTINGS.CREATE_CHILD";
 
-        public const string UsersRead = "USERS_ROLES.READ";
+        public const string UsersRead = "USERS.READ";
 
         /// Kullanıcı kaydı.
-        public const string UsersCreate = "USERS_ROLES.CREATE";
+        public const string UsersCreate = "USERS.CREATE";
 
         /// <summary>
-        /// Rol atamak ve kaldırmak. <see cref="UsersCreate"/>'ten ayrı:
-        /// kullanıcı açmak müdürün işi olabilir, kimin yönetici olacağına karar
-        /// vermek yöneticinin.
+        /// Birini admin yapmak ya da adminliğini geri almak.
+        /// <see cref="UsersCreate"/>'ten ayrı: kullanıcı açmak günlük bir iş,
+        /// kimin izin şemasının dışına çıkacağına karar vermek değil.
         /// </summary>
-        public const string UsersManageRoles = "USERS_ROLES.MANAGE_ROLES";
+        public const string UsersManageMembership = "USERS.MANAGE_MEMBERSHIP";
 
-        public const string DepartmentsRead = "DEPARTMENTS.READ";
-        public const string DepartmentsCreate = "DEPARTMENTS.CREATE";
-        public const string DepartmentsUpdate = "DEPARTMENTS.UPDATE";
-        public const string DepartmentsDelete = "DEPARTMENTS.DELETE";
+        public const string RolesRead = "ROLES.READ";
+        public const string RolesCreate = "ROLES.CREATE";
+        public const string RolesUpdate = "ROLES.UPDATE";
+        public const string RolesDelete = "ROLES.DELETE";
 
-        /// Departmana kullanıcı almak, çıkarmak.
-        public const string DepartmentsAssignMembers = "DEPARTMENTS.ASSIGN_MEMBERS";
+        /// Kullanıcıya rol vermek, geri almak.
+        public const string RolesAssign = "ROLES.ASSIGN";
 
         /// <summary>
-        /// Departmanın izin kümesini değiştirmek. Üyelik atamaktan ayrı: üyelik
-        /// yalnızca daraltır, izin kümesini düzenlemek yetkinin kendisini
-        /// şekillendirmek.
+        /// Bir rolün izin kümesini değiştirmek ve kişiye özel izin vermek.
+        /// Rol atamaktan ayrı: atamak var olan bir kümeyi kullanmak, bunu
+        /// düzenlemek ise yetkinin kendisini şekillendirmek.
         /// </summary>
-        public const string DepartmentsManagePermissions = "DEPARTMENTS.MANAGE_PERMISSIONS";
+        public const string RolesManagePermissions = "ROLES.MANAGE_PERMISSIONS";
 
         public const string BillingRead = "BILLING.READ";
         public const string BillingManage = "BILLING.MANAGE";
@@ -90,9 +90,9 @@ namespace Grafirio.Shared.Identity.Permissions
             DataSourcesRead, DataSourcesCreate, DataSourcesUpdate, DataSourcesDelete,
             DocumentsRead, DocumentsCreate, DocumentsDelete,
             CompanySettingsRead, CompanySettingsUpdate, CompanySettingsCreateChild,
-            UsersRead, UsersCreate, UsersManageRoles,
-            DepartmentsRead, DepartmentsCreate, DepartmentsUpdate, DepartmentsDelete,
-            DepartmentsAssignMembers, DepartmentsManagePermissions,
+            UsersRead, UsersCreate, UsersManageMembership,
+            RolesRead, RolesCreate, RolesUpdate, RolesDelete,
+            RolesAssign, RolesManagePermissions,
             BillingRead, BillingManage
         ];
 

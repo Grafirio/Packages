@@ -20,13 +20,19 @@ namespace Grafirio.Shared.Identity.Permissions
 
         public const string Documents = "DOCUMENTS";
         public const string CompanySettings = "COMPANY_SETTINGS";
-        public const string UsersRoles = "USERS_ROLES";
-        public const string Departments = "DEPARTMENTS";
+
+        /// Kim var, kim admin.
+        public const string Users = "USERS";
+
+        /// Adlandirilmis izin kumeleri. Onceki adi DEPARTMENTS idi; departman
+        /// bir organizasyon birimiydi, bu ise izin kumesi.
+        public const string Roles = "ROLES";
+
         public const string Billing = "BILLING";
 
         public static readonly string[] All =
         [
-            Analysis, DataSources, Documents, CompanySettings, UsersRoles, Departments, Billing
+            Analysis, DataSources, Documents, CompanySettings, Users, Roles, Billing
         ];
 
         private static readonly HashSet<string> AllSet = [.. All];
