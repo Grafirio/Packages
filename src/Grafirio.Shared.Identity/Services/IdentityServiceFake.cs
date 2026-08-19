@@ -41,9 +41,8 @@
         // Business Authorization
         public bool HasCompanyAccess(Guid companyId) => AccessibleCompanyIds.Contains(companyId);
 
-        public bool HasBusinessRole(string role, Guid? companyId = null) => 
-            GetBusinessRoles(companyId).Contains(role, StringComparer.OrdinalIgnoreCase);
+        public bool HasBusinessRole(string role, Guid? companyId = null) =>
+            role == "PLATFORM_ADMIN";
 
-        public List<string> GetBusinessRoles(Guid? companyId = null) => ["COMPANY_ADMIN", "DASHBOARD_VIEWER"];
     }
 }

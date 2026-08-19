@@ -139,18 +139,17 @@ namespace Grafirio.Shared.Identity.Services
             return CurrentCompanyId == companyId || AccessibleCompanyIds.Contains(companyId);
         }
 
+        /// <summary>
+        /// Token'daki business_roles claim'i. Sirket ici yetki icin degil:
+        /// o artik Identity'nin veritabaninda ve izin kumeleriyle ifade
+        /// ediliyor. Geriye kalan tek kullanim PLATFORM_ADMIN — platform
+        /// ekibi bir sirket rolu degil, sirketlerin disinda duruyor.
+        /// </summary>
         public bool HasBusinessRole(string role, Guid? companyId = null)
         {
-            var businessRoles = GetBusinessRoles(companyId);
-            return businessRoles.Contains(role, StringComparer.OrdinalIgnoreCase);
+            return GetClaimValues("business_roles")
+                .Contains(role, StringComparer.OrdinalIgnoreCase);
         }
 
-        public List<string> GetBusinessRoles(Guid? companyId = null)
-        {
-            // Business roles can be stored in JWT as custom claims
-            // Format: "business_roles" or "company_123_roles"
-            var claimType = companyId.HasValue ? $"company_{companyId}_roles" : "business_roles";
-            return GetClaimValues(claimType);
-        }
     }
 }

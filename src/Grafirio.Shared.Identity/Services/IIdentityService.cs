@@ -20,6 +20,5 @@
         // Business Authorization
         bool HasCompanyAccess(Guid companyId);
         bool HasBusinessRole(string role, Guid? companyId = null);
-        List<string> GetBusinessRoles(Guid? companyId = null);
     }
 }

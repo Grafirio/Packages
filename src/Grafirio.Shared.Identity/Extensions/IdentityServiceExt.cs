@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.DependencyInjection;
-using Grafirio.Shared.Identity.Authorization;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Grafirio.Shared.Identity.Services;
 
 namespace Grafirio.Shared.Identity.Extensions
@@ -12,9 +10,6 @@ namespace Grafirio.Shared.Identity.Extensions
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<IKeycloakUserService, KeycloakUserService>();
 
-            // Authorization handlers are scoped because they depend on IIdentityService
-            services.AddScoped<IAuthorizationHandler, CompanyAccessHandler>();
-            services.AddScoped<IAuthorizationHandler, BusinessRoleHandler>();
 
             return services;
         }
