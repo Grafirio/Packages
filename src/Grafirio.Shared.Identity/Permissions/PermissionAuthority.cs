@@ -1,7 +1,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Claims;
-using System.Text.Json.Serialization;
+using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -74,10 +74,7 @@ namespace Grafirio.Shared.Identity.Permissions
                     return null;
                 }
 
-                var body = await response.Content
-                    .ReadFromJsonAsync<PermissionEnvelope>(cancellationToken);
-
-                var effective = body?.Data;
+                var effective = await ReadEffectiveAsync(response, cancellationToken);
 
                 if (effective is not null)
                 {
@@ -111,11 +108,45 @@ namespace Grafirio.Shared.Identity.Permissions
                 : null;
         }
 
-        /// Identity ServiceResult<T> ile sarmalayarak donuyor: { data: {...} }.
-        private sealed class PermissionEnvelope
+        /// <summary>
+        /// Cevabin govdesini okur. IKI sekli de kabul ediyor: nesnenin kendisi
+        /// ya da { data: {...} } ile sarmalanmis hali.
+        ///
+        /// Onceden yalnizca sarmalanmis sekil okunuyordu ve bu YANLIS bir
+        /// varsayimdi: Identity ucu ServiceResult<T>.Data yi sarmalamadan
+        /// donuyor (EndpointResultExt.ToGenericResult -> Results.Ok(result.Data)).
+        /// System.Text.Json bilinmeyen alanlari sessizce yok saydigi icin
+        /// istisna da atilmiyordu; Data hep null kaliyor, yani izin listesi
+        /// hicbir zaman ulasmiyordu.
+        ///
+        /// Sonucu buyuktu ve teshisi zordu: CanAsync her zaman false donuyor,
+        /// RequirePermission ile korunan HER UC reddediyordu — kurucu ve admin
+        /// dahil, cunku muafiyet Identity tarafinda hesaplaniyor ve tam da
+        /// burada kayboluyordu. Disaridan gorunen tek sey, sebebi yazmayan bir
+        /// yetki hatasiydi.
+        ///
+        /// Iki sekil birden kabul ediliyor cunku panel de oyle yapiyor
+        /// (unwrap = data?.data ?? data) ve hala sarmalayan bir uc kalmis
+        /// olabilir. Toleransli okuma burada ucuz; yanlis taraf secmek degil.
+        /// </summary>
+        private static async Task<EffectivePermissions?> ReadEffectiveAsync(
+            HttpResponseMessage response, CancellationToken cancellationToken)
         {
-            [JsonPropertyName("data")]
-            public EffectivePermissions? Data { get; set; }
+            var payload = await response.Content
+                .ReadFromJsonAsync<JsonElement>(cancellationToken);
+
+            if (payload.ValueKind != JsonValueKind.Object) return null;
+
+            var body = payload.TryGetProperty("data", out var wrapped)
+                       && wrapped.ValueKind == JsonValueKind.Object
+                ? wrapped
+                : payload;
+
+            return body.Deserialize<EffectivePermissions>(JsonOptions);
         }
+
+        /// Uc camelCase yaziyor; okuma da web varsayilanlariyla yapiliyor.
+        private static readonly JsonSerializerOptions JsonOptions =
+            new(JsonSerializerDefaults.Web);
     }
 }
