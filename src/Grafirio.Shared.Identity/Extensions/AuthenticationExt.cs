@@ -80,28 +80,6 @@ namespace Grafirio.Shared.Identity.Extensions
                     policy.RequireClaim("company_id"); // User must have company assignment
                 });
 
-                options.AddPolicy("CompanyAdmin", policy =>
-                {
-                    policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
-                    policy.RequireAuthenticatedUser();
-                    policy.RequireClaim("business_roles", "COMPANY_ADMIN");
-                });
-
-                options.AddPolicy("CompanyManager", policy =>
-                {
-                    policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
-                    policy.RequireAuthenticatedUser();
-                    policy.RequireAssertion(context =>
-                    {
-                        var businessRoles = context.User.Claims
-                            .Where(c => c.Type == "business_roles")
-                            .Select(c => c.Value)
-                            .ToList();
-                        
-                        return businessRoles.Contains("COMPANY_ADMIN") || 
-                               businessRoles.Contains("COMPANY_MANAGER");
-                    });
-                });
             });
 
             // Sign
