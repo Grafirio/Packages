@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Grafirio.Shared.Infrastructure\Grafirio.Shared.Infrastructure.csproj" />
+    <InternalsVisibleTo Include="Grafirio.Shared.Identity.Tests" />
   </ItemGroup>
 
 </Project>

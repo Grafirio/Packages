@@ -3,20 +3,15 @@ using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Grafirio.Shared.Identity.Permissions
 {
     internal class PermissionAuthority(
         HttpClient http,
         IHttpContextAccessor httpContextAccessor,
-        IMemoryCache cache,
-        IOptions<PermissionOptions> options,
         ILogger<PermissionAuthority> logger) : IPermissionAuthority
     {
-        private readonly PermissionOptions _options = options.Value;
 
         public async Task<bool> CanAsync(Guid companyId, string permission,
             CancellationToken cancellationToken = default)
@@ -42,9 +37,9 @@ namespace Grafirio.Shared.Identity.Permissions
 
             var key = $"perm:{userId}:{companyId}";
 
-            if (cache.TryGetValue<EffectivePermissions>(key, out var cached))
+            if (context!.Items.TryGetValue(key, out var cached))
             {
-                return cached;
+                return cached as EffectivePermissions;
             }
 
             try
@@ -64,7 +59,7 @@ namespace Grafirio.Shared.Identity.Permissions
                     if (response.StatusCode is System.Net.HttpStatusCode.Forbidden
                         or System.Net.HttpStatusCode.NotFound)
                     {
-                        cache.Set(key, (EffectivePermissions?)null, _options.CacheDuration);
+                        context.Items[key] = null;
                         return null;
                     }
 
@@ -76,11 +71,11 @@ namespace Grafirio.Shared.Identity.Permissions
 
                 var effective = await ReadEffectiveAsync(response, cancellationToken);
 
-                if (effective is not null)
+                if (effective is not null && effective.CompanyId == companyId)
                 {
-                    cache.Set(key, effective, _options.CacheDuration);
+                    context.Items[key] = effective;
                 }
-
+                else return null;
                 return effective;
             }
             catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)

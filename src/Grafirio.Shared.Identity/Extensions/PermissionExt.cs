@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Grafirio.Shared.Identity.Services;
 
 namespace Grafirio.Shared.Identity.Extensions
 {
@@ -48,9 +49,8 @@ namespace Grafirio.Shared.Identity.Extensions
         /// <summary>
         /// Ucu bir izne bağlar: <c>.RequirePermission(AppPermissions.DataSourcesUpdate)</c>.
         ///
-        /// Şirket kimliği önce yoldan/sorgudan, yoksa token'daki
-        /// <c>company_id</c> claim'inden okunuyor — veri uçlarının çoğu şirketi
-        /// istekte taşımıyor, token'dan alıyor.
+        /// Uses the same validated selection as IIdentityService.CurrentCompanyId:
+        /// explicit header/route/query must agree; the token is only a legacy default.
         ///
         /// Kimlik doğrulamanın yerini almıyor, üstüne biniyor: grubun ayrıca
         /// <c>RequireAuthorization</c> demesi gerekiyor.
@@ -61,7 +61,12 @@ namespace Grafirio.Shared.Identity.Extensions
             return builder.AddEndpointFilter(async (context, next) =>
             {
                 var httpContext = context.HttpContext;
-                var companyId = ResolveCompanyId(httpContext);
+                Guid? companyId;
+                try { companyId = CompanyRequestScope.Resolve(httpContext); }
+                catch (BadHttpRequestException exception)
+                {
+                    return Results.Problem(statusCode: 400, title: exception.Message);
+                }
 
                 if (companyId is null)
                 {
@@ -79,23 +84,5 @@ namespace Grafirio.Shared.Identity.Extensions
             });
         }
 
-        private static Guid? ResolveCompanyId(HttpContext httpContext)
-        {
-            if (httpContext.Request.RouteValues.TryGetValue("companyId", out var route) &&
-                Guid.TryParse(route?.ToString(), out var fromRoute))
-            {
-                return fromRoute;
-            }
-
-            if (httpContext.Request.Query.TryGetValue("companyId", out var query) &&
-                Guid.TryParse(query.FirstOrDefault(), out var fromQuery))
-            {
-                return fromQuery;
-            }
-
-            var claim = httpContext.User?.FindFirst("company_id")?.Value;
-
-            return Guid.TryParse(claim, out var fromClaim) ? fromClaim : null;
-        }
     }
 }

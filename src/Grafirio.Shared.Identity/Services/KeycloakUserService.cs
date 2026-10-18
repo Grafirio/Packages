@@ -12,6 +12,8 @@ namespace Grafirio.Shared.Identity.Services
         Task<ServiceResult> AssignUserToCompanyAsync(string userId, Guid companyId, string role);
         Task<ServiceResult> UpdateUserCompanyAsync(string userId, Guid companyId, string newRole);
         Task<ServiceResult> RemoveUserFromCompanyAsync(string userId, Guid companyId);
+        Task<ServiceResult<KeycloakAccount?>> FindUserByEmailAsync(string email);
+        Task<ServiceResult<KeycloakAccount?>> FindUserByIdAsync(string userId);
     }
 
     public class CreateUserRequest
@@ -29,6 +31,9 @@ namespace Grafirio.Shared.Identity.Services
     // Keycloak API DTOs
     public class KeycloakUserDto
     {
+        [JsonPropertyName("id")]
+        public string? Id { get; set; }
+
         [JsonPropertyName("username")]
         public string Username { get; set; } = string.Empty;
 
@@ -116,7 +121,7 @@ namespace Grafirio.Shared.Identity.Services
         private readonly KeycloakAdminOptions _adminOptions;
         private string? _adminToken;
 
-        public KeycloakUserService(IConfiguration configuration)
+        public KeycloakUserService(IConfiguration configuration, IKeycloakAdminApi? adminApi = null)
         {
             var identityOptions = configuration.GetSection("IdentityOption").Get<IdentityOption>();
             var adminOptions = configuration.GetSection("KeycloakAdmin").Get<KeycloakAdminOptions>();
@@ -128,7 +133,7 @@ namespace Grafirio.Shared.Identity.Services
             
             _adminOptions = adminOptions;
             _realm = _adminOptions.Realm;
-            _adminApi = RestService.For<IKeycloakAdminApi>(ResolveAdminBaseUrl(adminOptions, identityOptions));
+            _adminApi = adminApi ?? RestService.For<IKeycloakAdminApi>(ResolveAdminBaseUrl(adminOptions, identityOptions));
         }
 
         /// <summary>
@@ -194,17 +199,14 @@ namespace Grafirio.Shared.Identity.Services
                     return ServiceResult<string>.Error("User creation failed", response.ReasonPhrase ?? "Unknown error", response.StatusCode);
                 }
 
-                // Get the created user to return the ID
-                var createdUsers = await _adminApi.GetUsersAsync(_realm, request.Email, $"Bearer {_adminToken}");
-                var createdUser = createdUsers?.FirstOrDefault();
-                
-                if (createdUser == null)
+                var userId = response.Headers.Location?.Segments.LastOrDefault();
+                if (!Guid.TryParse(userId, out _))
                 {
-                    return ServiceResult<string>.Error("User created but ID not found", System.Net.HttpStatusCode.InternalServerError);
+                    var found = await FindUserByEmailAsync(request.Email);
+                    userId = found.IsSuccess ? found.Data?.Id : null;
                 }
-
-                // Extract user ID from location header or use email as fallback
-                var userId = response.Headers.Location?.Segments.LastOrDefault() ?? createdUser.Username;
+                if (!Guid.TryParse(userId, out _))
+                    return ServiceResult<string>.Error("User account could not be confirmed", System.Net.HttpStatusCode.ServiceUnavailable);
                 
                 return ServiceResult<string>.SuccessAsCreated(userId, $"/users/{userId}");
             }
@@ -213,6 +215,46 @@ namespace Grafirio.Shared.Identity.Services
                 return ServiceResult<string>.Error("Keycloak user creation failed", ex.Message, System.Net.HttpStatusCode.InternalServerError);
             }
         }
+
+        public async Task<ServiceResult<KeycloakAccount?>> FindUserByEmailAsync(string email)
+        {
+            try
+            {
+                await EnsureAdminTokenAsync();
+                var users = await _adminApi.GetUsersAsync(_realm, email.Trim(), $"Bearer {_adminToken}");
+                var matches = users.Where(user => string.Equals(user.Email, email.Trim(), StringComparison.OrdinalIgnoreCase)).ToList();
+                if (matches.Count > 1)
+                    return ServiceResult<KeycloakAccount?>.Error("Email identifies multiple accounts", System.Net.HttpStatusCode.Conflict);
+                return ServiceResult<KeycloakAccount?>.SuccessAsOk(Account(matches.SingleOrDefault()));
+            }
+            catch
+            {
+                return ServiceResult<KeycloakAccount?>.Error("Identity provider unavailable", System.Net.HttpStatusCode.ServiceUnavailable);
+            }
+        }
+
+        public async Task<ServiceResult<KeycloakAccount?>> FindUserByIdAsync(string userId)
+        {
+            if (!Guid.TryParse(userId, out var id) || id == Guid.Empty)
+                return ServiceResult<KeycloakAccount?>.Error("Invalid user identity", System.Net.HttpStatusCode.BadRequest);
+            try
+            {
+                await EnsureAdminTokenAsync();
+                return ServiceResult<KeycloakAccount?>.SuccessAsOk(Account(
+                    await _adminApi.GetUserAsync(_realm, userId, $"Bearer {_adminToken}")));
+            }
+            catch (ApiException exception) when (exception.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return ServiceResult<KeycloakAccount?>.SuccessAsOk(null);
+            }
+            catch
+            {
+                return ServiceResult<KeycloakAccount?>.Error("Identity provider unavailable", System.Net.HttpStatusCode.ServiceUnavailable);
+            }
+        }
+
+        private static KeycloakAccount? Account(KeycloakUserDto? user)
+            => user is not null && Guid.TryParse(user.Id, out _) ? new(user.Id!, user.Email, user.Enabled) : null;
 
         public async Task<ServiceResult> AssignUserToCompanyAsync(string userId, Guid companyId, string role)
         {
@@ -325,7 +367,7 @@ namespace Grafirio.Shared.Identity.Services
                     ["password"] = _adminOptions.Password
                 };
 
-                var tokenResponse = await _adminApi.GetAdminTokenAsync(_realm, credentials);
+                var tokenResponse = await _adminApi.GetAdminTokenAsync(_adminOptions.AdminRealm, credentials);
                 _adminToken = tokenResponse.AccessToken;
             }
         }
@@ -354,6 +396,7 @@ namespace Grafirio.Shared.Identity.Services
         public required string Realm { get; set; }
         public required string Username { get; set; }
         public required string Password { get; set; }
+        public string AdminRealm { get; set; } = "master";
 
         /// <summary>
         /// Keycloak'in kok adresi (ornek: https://keycloak.example.com), realm eki olmadan.
@@ -361,4 +404,6 @@ namespace Grafirio.Shared.Identity.Services
         /// </summary>
         public string? AdminAddress { get; set; }
     }
+
+    public record KeycloakAccount(string Id, string Email, bool Enabled);
 }

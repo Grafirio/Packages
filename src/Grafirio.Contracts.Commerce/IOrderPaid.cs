@@ -15,6 +15,7 @@ public interface IOrderPaid
 
     /// <summary>Ödemeyi yapan kullanıcının Keycloak kimliği.</summary>
     string BuyerId { get; }
+    Guid? CompanyId { get; }
 
     Guid PaymentId { get; }
     decimal Amount { get; }
@@ -35,5 +36,6 @@ public record OrderPaid(
     Guid PaymentId,
     decimal Amount,
     DateTime PaidAt,
-    IReadOnlyList<string> SubscriptionPlans
+    IReadOnlyList<string> SubscriptionPlans,
+    Guid? CompanyId = null
 ) : IOrderPaid;
