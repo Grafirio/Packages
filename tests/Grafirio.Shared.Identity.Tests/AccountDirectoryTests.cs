@@ -26,7 +26,7 @@ public class AccountDirectoryTests
         var expected = Guid.NewGuid().ToString();
         api.Setup(x => x.GetUsersAsync("grafirio", "person@example.invalid", It.IsAny<string>())).ReturnsAsync([
             new() { Id = Guid.NewGuid().ToString(), Email = "another-person@example.invalid" },
-            new() { Id = expected, Email = "PERSON@example.invalid" }
+            new() { Id = expected.ToUpperInvariant(), Email = "PERSON@example.invalid" }
         ]);
         var result = await Service(api).FindUserByEmailAsync(" person@example.invalid ");
         Assert.True(result.IsSuccess);

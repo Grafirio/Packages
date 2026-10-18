@@ -208,6 +208,7 @@ namespace Grafirio.Shared.Identity.Services
                 if (!Guid.TryParse(userId, out _))
                     return ServiceResult<string>.Error("User account could not be confirmed", System.Net.HttpStatusCode.ServiceUnavailable);
                 
+                userId = Guid.Parse(userId!).ToString();
                 return ServiceResult<string>.SuccessAsCreated(userId, $"/users/{userId}");
             }
             catch (Exception ex)
@@ -241,7 +242,7 @@ namespace Grafirio.Shared.Identity.Services
             {
                 await EnsureAdminTokenAsync();
                 return ServiceResult<KeycloakAccount?>.SuccessAsOk(Account(
-                    await _adminApi.GetUserAsync(_realm, userId, $"Bearer {_adminToken}")));
+                    await _adminApi.GetUserAsync(_realm, id.ToString(), $"Bearer {_adminToken}")));
             }
             catch (ApiException exception) when (exception.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
@@ -254,7 +255,7 @@ namespace Grafirio.Shared.Identity.Services
         }
 
         private static KeycloakAccount? Account(KeycloakUserDto? user)
-            => user is not null && Guid.TryParse(user.Id, out _) ? new(user.Id!, user.Email, user.Enabled) : null;
+            => user is not null && Guid.TryParse(user.Id, out var id) ? new(id.ToString(), user.Email, user.Enabled) : null;
 
         public async Task<ServiceResult> AssignUserToCompanyAsync(string userId, Guid companyId, string role)
         {
