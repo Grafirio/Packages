@@ -66,7 +66,7 @@ namespace Grafirio.Shared.Identity.Permissions
                     logger.LogWarning(
                         "Yetki sorusu cevaplanamadi: {Status} (sirket {CompanyId})",
                         response.StatusCode, companyId);
-                    return null;
+                    throw new PermissionUnavailableException("Yetki servisi yanıtı doğrulanamadı.");
                 }
 
                 var effective = await ReadEffectiveAsync(response, cancellationToken);
@@ -75,16 +75,17 @@ namespace Grafirio.Shared.Identity.Permissions
                 {
                     context.Items[key] = effective;
                 }
-                else return null;
+                else throw new PermissionUnavailableException("Yetki servisi geçersiz bir karar döndürdü.");
                 return effective;
             }
-            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+            catch (Exception ex) when (ex is HttpRequestException or System.Text.Json.JsonException
+                || ex is TaskCanceledException && !cancellationToken.IsCancellationRequested)
             {
                 // Sessizce "izinsiz" dönülüyor ama log'lanıyor: Identity
                 // ulaşılamazken bütün yazma işlemlerinin 403 dönmesi, sebebi
                 // görünmeden yaşanacak bir arıza olurdu.
                 logger.LogWarning(ex, "Identity'ye ulasilamadi; yetki reddedildi (sirket {CompanyId})", companyId);
-                return null;
+                throw new PermissionUnavailableException("Yetki servisine ulaşılamadı.", ex);
             }
         }
 

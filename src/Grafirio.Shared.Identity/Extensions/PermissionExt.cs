@@ -58,6 +58,7 @@ namespace Grafirio.Shared.Identity.Extensions
         public static TBuilder RequirePermission<TBuilder>(this TBuilder builder, string permission)
             where TBuilder : IEndpointConventionBuilder
         {
+            builder.WithMetadata(new PermissionMetadata(permission));
             return builder.AddEndpointFilter(async (context, next) =>
             {
                 var httpContext = context.HttpContext;
@@ -75,9 +76,15 @@ namespace Grafirio.Shared.Identity.Extensions
 
                 var authority = httpContext.RequestServices.GetRequiredService<IPermissionAuthority>();
 
-                if (!await authority.CanAsync(companyId.Value, permission, httpContext.RequestAborted))
+                try
                 {
-                    return Results.Forbid();
+                    if (!await authority.CanAsync(companyId.Value, permission, httpContext.RequestAborted))
+                        return Results.Forbid();
+                }
+                catch (PermissionUnavailableException)
+                {
+                    return Results.Problem(statusCode: 503, title: "Yetki doğrulanamadı. Tekrar deneyin.",
+                        extensions: new Dictionary<string, object?> { ["code"] = "authorization_unavailable" });
                 }
 
                 return await next(context);

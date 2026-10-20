@@ -19,5 +19,7 @@ namespace Grafirio.Shared.Identity.Permissions
         Guid CompanyId,
         string? Role,
         IReadOnlyList<string> Modules,
-        IReadOnlyList<string> Permissions);
+        IReadOnlyList<string> Permissions,
+        string? Version = null,
+        IReadOnlyList<string>? Sources = null);
 }
