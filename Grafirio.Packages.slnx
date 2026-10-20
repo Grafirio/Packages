@@ -4,4 +4,7 @@
     <Project Path="src/Grafirio.Shared.Identity/Grafirio.Shared.Identity.csproj" />
     <Project Path="src/Grafirio.Shared.Infrastructure/Grafirio.Shared.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Grafirio.Shared.Identity.Tests/Grafirio.Shared.Identity.Tests.csproj" />
+  </Folder>
 </Solution>

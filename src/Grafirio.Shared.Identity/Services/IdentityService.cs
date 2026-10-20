@@ -78,8 +78,7 @@ namespace Grafirio.Shared.Identity.Services
         {
             get
             {
-                var companyIdClaim = GetClaim("company_id");
-                return companyIdClaim != null ? Guid.Parse(companyIdClaim) : null;
+                return CompanyRequestScope.Resolve(httpContextAccessor.HttpContext);
             }
         }
 
@@ -136,7 +135,8 @@ namespace Grafirio.Shared.Identity.Services
 
         public bool HasCompanyAccess(Guid companyId)
         {
-            return CurrentCompanyId == companyId || AccessibleCompanyIds.Contains(companyId);
+            return Guid.TryParse(GetClaim("company_id"), out var tokenCompany) && tokenCompany == companyId
+                || AccessibleCompanyIds.Contains(companyId);
         }
 
         /// <summary>

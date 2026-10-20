@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using Grafirio.Shared.Identity.Options;
+using Grafirio.Shared.Identity.Services;
 
 namespace Grafirio.Shared.Identity.Extensions
 {
@@ -77,7 +78,15 @@ namespace Grafirio.Shared.Identity.Extensions
                 {
                     policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
                     policy.RequireAuthenticatedUser();
-                    policy.RequireClaim("company_id"); // User must have company assignment
+                    policy.RequireAssertion(context =>
+                    {
+                        try
+                        {
+                            return context.Resource is Microsoft.AspNetCore.Http.HttpContext http
+                                && CompanyRequestScope.Resolve(http).HasValue;
+                        }
+                        catch (Microsoft.AspNetCore.Http.BadHttpRequestException) { return false; }
+                    });
                 });
 
             });

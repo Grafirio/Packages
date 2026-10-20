@@ -35,7 +35,8 @@ namespace Grafirio.Shared.Identity.Filters
             }
 
             // Validate company access
-            if (!_identityService.HasCompanyAccess(companyId))
+            var authority = context.HttpContext.RequestServices.GetService<Grafirio.Shared.Identity.Permissions.IPermissionAuthority>();
+            if (authority is null || await authority.ForCompanyAsync(companyId, context.HttpContext.RequestAborted) is null)
             {
                 return Results.Forbid();
             }

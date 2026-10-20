@@ -19,6 +19,8 @@ namespace Grafirio.Shared.Identity.Permissions
         /// en geç bu kadar gecikmeyle yansımalı, aksi halde bir kullanıcının
         /// yetkisini almak "biraz sonra" anlamına gelir.
         /// </summary>
-        public TimeSpan CacheDuration { get; set; } = TimeSpan.FromSeconds(30);
+        // Retained for configuration compatibility. Permission decisions are now cached only
+        // in HttpContext.Items; revocations are observed on the next request.
+        public TimeSpan CacheDuration { get; set; } = TimeSpan.Zero;
     }
 }
