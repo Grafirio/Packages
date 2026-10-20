@@ -23,6 +23,7 @@ namespace Grafirio.Shared.Identity.Permissions
         public async Task<EffectivePermissions?> ForCompanyAsync(Guid companyId,
             CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var context = httpContextAccessor.HttpContext;
 
             // Kimliksiz istekte sorulacak bir şey yok. Anahtarsız önbelleğe
@@ -71,7 +72,7 @@ namespace Grafirio.Shared.Identity.Permissions
 
                 var effective = await ReadEffectiveAsync(response, cancellationToken);
 
-                if (effective is not null && effective.CompanyId == companyId)
+                if (effective is not null && effective.CompanyId == companyId && effective.Permissions is not null && effective.Modules is not null)
                 {
                     context.Items[key] = effective;
                 }
@@ -81,9 +82,7 @@ namespace Grafirio.Shared.Identity.Permissions
             catch (Exception ex) when (ex is HttpRequestException or System.Text.Json.JsonException
                 || ex is TaskCanceledException && !cancellationToken.IsCancellationRequested)
             {
-                // Sessizce "izinsiz" dönülüyor ama log'lanıyor: Identity
-                // ulaşılamazken bütün yazma işlemlerinin 403 dönmesi, sebebi
-                // görünmeden yaşanacak bir arıza olurdu.
+                // An authority outage must remain distinct from an absent permission.
                 logger.LogWarning(ex, "Identity'ye ulasilamadi; yetki reddedildi (sirket {CompanyId})", companyId);
                 throw new PermissionUnavailableException("Yetki servisine ulaşılamadı.", ex);
             }

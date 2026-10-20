@@ -15,15 +15,13 @@ namespace Grafirio.Shared.Identity.Permissions
         /// Belirli bir iznin verilip verilmediği. Şirkete erişim kontrolünü de
         /// kapsıyor: erişimi olmayanın rolü null, rolü null olanın izni yok.
         ///
-        /// Identity'ye ulaşılamazsa <c>false</c> döner. Yetki kararı sorulamıyorsa
-        /// verilmez — panelin tersi: orada izin okunamayınca menü gizlenmiyor,
-        /// çünkü orada karar değil görünüm söz konusu.
+        /// Authority failures throw PermissionUnavailableException. Request cancellation is preserved.
         /// </summary>
         Task<bool> CanAsync(Guid companyId, string permission, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Kullanıcının şirketteki bütün yetkisi. Erişimi yoksa ya da soru
-        /// cevaplanamadıysa null.
+        /// cevaplanamadıysa PermissionUnavailableException.
         /// </summary>
         Task<EffectivePermissions?> ForCompanyAsync(Guid companyId, CancellationToken cancellationToken = default);
     }

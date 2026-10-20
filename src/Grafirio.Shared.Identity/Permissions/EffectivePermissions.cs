@@ -5,7 +5,7 @@ namespace Grafirio.Shared.Identity.Permissions
     /// <c>GET /api/v1/permissions/me/{companyId}</c> ucunun gövdesi.
     ///
     /// Hesabı Identity yapıyor: rollerin ve kişisel izinlerin birleşimi,
-    /// kurucu ve admin muafiyeti orada. Burada duran şey yalnızca sonucun
+    /// açık kapsam kayıtları da aynı veritabanı kararına katılır. Burada duran şey yalnızca sonucun
     /// biçimi; iki tarafın ayrı ayrı tanımladığı bir sözleşme, sessizce
     /// ayrışan bir sözleşmedir.
     /// </summary>
