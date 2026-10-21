@@ -127,7 +127,7 @@ public class CompanyScopeTests
         http.HttpContext.Request.Headers.Authorization = "Bearer synthetic-token";
         var authority = new PermissionAuthority(new HttpClient(handler) { BaseAddress = new("https://identity.test.invalid/") },
             http, NullLogger<PermissionAuthority>.Instance);
-        Assert.False(await authority.CanAsync(selected, AppPermissions.AnalysisRead));
+        await Assert.ThrowsAsync<PermissionUnavailableException>(() => authority.CanAsync(selected, AppPermissions.AnalysisRead));
     }
 
     private static DefaultHttpContext Http(Guid company) => new() {

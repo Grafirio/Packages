@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -63,7 +63,7 @@ namespace Grafirio.Shared.Identity.Extensions
                 {
                     policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
                     policy.RequireAuthenticatedUser();
-                    policy.RequireClaim(ClaimTypes.Email);
+                    policy.RequireClaim(ClaimTypes.NameIdentifier);
                 });
 
                 options.AddPolicy("ClientCredential", policy =>

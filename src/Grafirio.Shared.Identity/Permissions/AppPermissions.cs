@@ -51,6 +51,8 @@ namespace Grafirio.Shared.Identity.Permissions
         /// Alt şirket açmak. Şirket bilgisini düzeltmekten ayrı: yeni bir tüzel
         /// kişilik açmak aynı ağırlıkta bir iş değil.
         /// </summary>
+        public const string CompanySettingsCreateRoot = "COMPANY_SETTINGS.CREATE_ROOT";
+
         public const string CompanySettingsCreateChild = "COMPANY_SETTINGS.CREATE_CHILD";
 
         public const string UsersRead = "USERS.READ";
@@ -89,7 +91,7 @@ namespace Grafirio.Shared.Identity.Permissions
             AnalysisRead, AnalysisCreate, AnalysisDelete,
             DataSourcesRead, DataSourcesCreate, DataSourcesUpdate, DataSourcesDelete,
             DocumentsRead, DocumentsCreate, DocumentsDelete,
-            CompanySettingsRead, CompanySettingsUpdate, CompanySettingsCreateChild,
+            CompanySettingsRead, CompanySettingsUpdate, CompanySettingsCreateRoot, CompanySettingsCreateChild,
             UsersRead, UsersCreate, UsersManageMembership,
             RolesRead, RolesCreate, RolesUpdate, RolesDelete,
             RolesAssign, RolesManagePermissions,
