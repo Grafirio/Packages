@@ -7,7 +7,7 @@ Shared NuGet packages for Grafirio services, published to GitHub Packages.
 | Package | Description |
 |---|---|
 | `Grafirio.Contracts.AI` | MassTransit message contracts for AI services (data analysis, Q&A, graph data, PyCaret). |
-| `Grafirio.Shared.Infrastructure` | ServiceResult pattern, exception/correlation/request-logging middleware, API versioning, validation filter, MassTransit/RabbitMQ setup. |
+| `Grafirio.Shared.Infrastructure` | ServiceResult pattern, exception/correlation/request-logging middleware, API versioning, validation filter, MassTransit setup for RabbitMQ (default) or Azure Service Bus (`Messaging:Transport`; `AzureServiceBus:ConnectionString`). |
 | `Grafirio.Shared.Identity` | Keycloak integration, current-user abstraction, company-based authorization policies, handlers, attributes and filters. |
 
 ## Company scope and permission decisions
